@@ -5,13 +5,28 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+
 @SpringBootApplication
+@CrossOrigin
 @RestController
 public class DemoApplication {
-    private final List<User> users = new ArrayList<>();
-    private List<Poll> polls = new ArrayList<>();
+    User adminUserAccount = new User("Admin", "admin@admin.com");
+    User samUserAccount = new User("Sam", "sam@hvl.no");
+    User tomUserAccount = new User("Tom", "tom@uib.no");
+
+    private List<User> users = Arrays.asList(adminUserAccount,  samUserAccount, tomUserAccount);
+    VoteOption rainyOption = new VoteOption("Yes, lots of rain", 1);
+    VoteOption lessRainyOption = new VoteOption("No, a little bit of rain", 2);
+    List<VoteOption> rainyVoteOptions = Arrays.asList(rainyOption, lessRainyOption);
+    Poll firstPoll = new Poll(1, "Will it rain today?", rainyVoteOptions, "Admin");
+    private List<Poll> polls = Arrays.asList(firstPoll);
+
+    {
+        adminUserAccount.setCreatedPolls(polls);
+    }
 
     private void updatePolls() {
         List<Poll> updatedPolls = new ArrayList<>();
@@ -212,30 +227,30 @@ public class DemoApplication {
 
 //    VOTES
 
-    private String findVoteUsernames(Integer presentationOrder) {
-        String usernames = "";
+    private List<String> findVoteUsernames(Integer presentationOrder) {
+        List<String> usernames = new ArrayList<>();
         for (User tempUser : users) {
             for (Vote tempVote : tempUser.getVotedPolls()) {
                 if (tempVote.getVoteOption().getPresentationOrder().equals(presentationOrder)) {
-                    usernames = usernames.concat(' ' +tempUser.getUsername());
+                    usernames.add(tempUser.getUsername());
                 }
             }
         }
         return usernames;
     }
 
+
+    public record OutGoingVote(Integer presentationOrder, List<String> usernames) {}
     @GetMapping("/getVotes/{pollId}")
-    public String getVoteOption(@PathVariable String pollId) {
-        String tempResponse;
+    public List<OutGoingVote> getVoteOption(@PathVariable String pollId) {
+        List<OutGoingVote> outGoingVotes = new ArrayList<>();
         for (Poll tempPoll : polls) {
             if (tempPoll.getId().equals(Integer.parseInt(pollId))) {
-                tempResponse = tempPoll.getQuestion();
                 for (VoteOption tempVoteOption : tempPoll.getOptions()) {
-                    tempResponse = tempResponse.concat('\n' + tempVoteOption.getCaption());
-//                    get usernames
-                    tempResponse = tempResponse.concat('\n' + findVoteUsernames(tempVoteOption.getPresentationOrder())) + '\n';
+                    OutGoingVote tempOutGoingVote = new OutGoingVote(tempVoteOption.getPresentationOrder(), findVoteUsernames(tempVoteOption.getPresentationOrder()));
+                    outGoingVotes.add(tempOutGoingVote);
                 }
-                return tempResponse;
+                return outGoingVotes;
             }
         }
         return null;
@@ -248,6 +263,11 @@ public class DemoApplication {
             if (tempPoll.getId().equals(Integer.parseInt(pollId))) {
                 for (VoteOption tempVoteOption : tempPoll.getOptions()) {
                     if (tempVoteOption.getPresentationOrder().equals(Integer.parseInt(presentationOrder))) {
+                        List<String> tempUsernames = tempVoteOption.getVoteUsernames();
+                        tempUsernames.add(username);
+                        tempVoteOption.setVoteUsernames(tempUsernames);
+
+                        // old implementation
                         Vote tempVote = new Vote(tempVoteOption, username, Integer.parseInt(pollId));
                         for (User tempUser : users) {
                             if (tempUser.getUsername().equals(username)) {

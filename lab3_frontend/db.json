@@ -1,0 +1,106 @@
+{
+  "polls": [
+    {
+      "id": "1",
+      "question": "What is 1+1?",
+      "options": [
+        {
+          "caption": "1",
+          "presentationOrder": 1
+        },
+        {
+          "caption": "2",
+          "presentationOrder": 2
+        }
+      ],
+      "username": "Tom",
+      "publishedAt": "2025-09-10T08:12:57.230957Z",
+      "validUntil": "2025-09-10T08:12:57.230958Z"
+    },
+    {
+      "id": "2",
+      "question": "What is 2+2?",
+      "options": [
+        {
+          "caption": "4",
+          "presentationOrder": 1
+        },
+        {
+          "caption": "8",
+          "presentationOrder": 2
+        }
+      ],
+      "username": "Sam",
+      "publishedAt": "2025-09-10T08:13:31.107010Z",
+      "validUntil": "2025-09-10T08:13:31.107013Z"
+    },
+    {
+      "id": 3,
+      "question": "Pineapple on Pizza?",
+      "options": [
+        {
+          "caption": "Yes",
+          "presentationOrder": 1
+        },
+        {
+          "caption": "No!",
+          "presentationOrder": 2
+        }
+      ],
+      "username": "Sam",
+      "publishedAt": "2025-09-10T15:57:50.019Z",
+      "validUntil": "2025-09-10T15:57:50.020Z"
+    },
+    {
+      "id": 4,
+      "question": "Sky colour",
+      "options": [
+        {
+          "caption": "Blue",
+          "presentationOrder": 1
+        },
+        {
+          "caption": "Cyan",
+          "presentationOrder": 2
+        }
+      ],
+      "username": "Tom",
+      "publishedAt": "2025-09-10T15:59:40.438Z",
+      "validUntil": "2025-09-10T15:59:40.438Z"
+    },
+    {
+      "id": 5,
+      "question": "Grass colour",
+      "options": [
+        {
+          "caption": "Green",
+          "presentationOrder": 1
+        },
+        {
+          "caption": "Dark green",
+          "presentationOrder": 2
+        }
+      ],
+      "username": "Tom",
+      "publishedAt": "2025-09-10T16:00:33.773Z",
+      "validUntil": "2025-09-10T16:00:33.773Z"
+    },
+    {
+      "id": 6,
+      "question": "Sea colour",
+      "options": [
+        {
+          "caption": "Blue",
+          "presentationOrder": 1
+        },
+        {
+          "caption": "Marine",
+          "presentationOrder": 2
+        }
+      ],
+      "username": "Sam",
+      "publishedAt": "2025-09-10T16:01:27.424Z",
+      "validUntil": "2025-09-10T16:01:27.424Z"
+    }
+  ]
+}
