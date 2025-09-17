@@ -19,6 +19,8 @@ repositories {
 }
 
 dependencies {
+
+
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
@@ -30,6 +32,13 @@ dependencies {
     testAnnotationProcessor("org.projectlombok:lombok:1.18.38")
 
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
+
+    implementation("org.hibernate.orm:hibernate-core:7.1.1.Final")
+    implementation("jakarta.persistence:jakarta.persistence-api:3.2.0")
+    implementation("com.h2database:h2:2.3.232")
+    implementation("org.hibernate.validator:hibernate-validator")
+
+
 }
 
 tasks.withType<Test> {
