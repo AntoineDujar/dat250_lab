@@ -6,7 +6,6 @@ import jakarta.persistence.PersistenceConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -31,39 +30,18 @@ public class PollsTest {
         em.persist(alice);
         em.persist(bob);
         em.persist(eve);
-
-        List<VoteOption> voteOptions1 = new ArrayList();
-        VoteOption voteOption = new VoteOption("Vim", 1);
-        voteOptions1.add(voteOption);
-        VoteOption voteOption2 = new VoteOption("Emacs", 2);
-        voteOptions1.add(voteOption2);
-        Poll poll = new Poll(1,"Vim or Emacs?", voteOptions1, "alice");
-        voteOption.setPoll(poll);
-        voteOption2.setPoll(poll);
-
-        List<VoteOption> voteOptions2 = new ArrayList();
-        VoteOption voteOption3 = new VoteOption("Yes! Yammy!", 1);
-        voteOptions2.add(voteOption3);
-        VoteOption voteOption4 = new VoteOption("Mamma mia: Nooooo!", 2);
-        voteOptions2.add(voteOption4);
-        Poll poll2 = new Poll(2,"Pineapple on Pizza", voteOptions2, "bob");
-        voteOption3.setPoll(poll2);
-        voteOption4.setPoll(poll2);
-
+        Poll poll = alice.createPoll("Vim or Emacs?");
+        VoteOption vim = poll.addVoteOption("Vim");
+        VoteOption emacs = poll.addVoteOption("Emacs");
+        Poll poll2 = eve.createPoll("Pineapple on Pizza");
+        VoteOption yes = poll2.addVoteOption("Yes! Yammy!");
+        VoteOption no = poll2.addVoteOption("Mamma mia: Nooooo!");
         em.persist(poll);
         em.persist(poll2);
-
-        Vote vote = new Vote(voteOption,"alice", 1);
-        em.persist(vote);
-
-        Vote vote2 = new Vote(voteOption,"bob", 1);
-        em.persist(vote2);
-
-        Vote vote3 = new Vote(voteOption2,"eve", 1);
-        em.persist(vote3);
-
-        Vote vote4 = new Vote(voteOption4,"eve", 1);
-        em.persist(vote4);
+        em.persist(alice.voteFor(vim));
+        em.persist(bob.voteFor(vim));
+        em.persist(eve.voteFor(emacs));
+        em.persist(eve.voteFor(yes));
     }
 
     @BeforeEach
@@ -77,7 +55,17 @@ public class PollsTest {
                 .property(PersistenceConfiguration.SCHEMAGEN_DATABASE_ACTION, "drop-and-create")
                 .property(PersistenceConfiguration.JDBC_USER, "sa")
                 .property(PersistenceConfiguration.JDBC_PASSWORD, "")
+                .property("hibernate.show_sql", "true") // Show SQL in console
+                .property("hibernate.format_sql", "true") // Format SQL for readability
+                .property("hibernate.use_sql_comments", "true") // Add comments to SQL
                 .createEntityManagerFactory();
+
+        try {
+            org.h2.tools.Server.createWebServer("-web", "-webAllowOthers", "-webPort", "8082").start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         emf.runInTransaction(em -> {
             populate(em);
         });
@@ -85,36 +73,44 @@ public class PollsTest {
     }
 
     @Test
+    public void inspectWithPause() {
+        emf.runInTransaction(em -> {
+            // Your test code
+            try {
+                Thread.sleep(300000); // Pause for 30 seconds to allow console access
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    @Test
     public void testUsers() {
         emf.runInTransaction(em -> {
-            Integer actual = (Integer) em.createNativeQuery("select count(username) from users", Integer.class).getSingleResult();
+            Integer actual = (Integer) em.createNativeQuery("select count(id) from users", Integer.class).getSingleResult();
             assertEquals(3, actual);
-            System.out.println(actual + " FOUND USERS");
 
             User maybeBob = em.createQuery("select u from User u where u.username like 'bob'", User.class).getSingleResultOrNull();
             assertNotNull(maybeBob);
-            System.out.println(maybeBob.getUsername() + " FOUND BOB?");
-
         });
     }
 
     @Test
     public void testVotes() {
         emf.runInTransaction(em -> {
-            Long vimVotes = em.createQuery("select count(v) from Vote v where v.username =:username", Long.class).setParameter("username", "alice").getSingleResult();
-            System.out.println(vimVotes + " FOUND VOTES");
-            assertEquals(1, vimVotes);
+            Long vimVotes = em.createQuery("select count(v) from Vote v join v.votesOn as o join o.poll as p join p.createdBy u where u.email = :mail and o.presentationOrder = :order", Long.class).setParameter("mail", "alice@online.com").setParameter("order", 0).getSingleResult();
+            Long emacsVotes = em.createQuery("select count(v) from Vote v join v.votesOn as o join o.poll as p join p.createdBy u where u.email = :mail and o.presentationOrder = :order", Long.class).setParameter("mail", "alice@online.com").setParameter("order", 1).getSingleResult();
+            assertEquals(2, vimVotes);
+            assertEquals(1, emacsVotes);
         });
     }
 
     @Test
     public void testOptions() {
         emf.runInTransaction(em -> {
-            List<String> poll2Options = em.createQuery("select o.caption from Poll p join p.options o ", String.class).getResultList();
-            System.out.println(poll2Options + " FOUND CAPTIONS");
-            List<String> expected = Arrays.asList("Vim", "Emacs", "Yes! Yammy!", "Mamma mia: Nooooo!");
+            List<String> poll2Options = em.createQuery("select o.caption from Poll p join p.options o join p.createdBy u where u.email = :mail order by o.presentationOrder", String.class).setParameter("mail", "eve@mail.org").getResultList();
+            List<String> expected = Arrays.asList("Yes! Yammy!", "Mamma mia: Nooooo!");
             assertEquals(expected, poll2Options);
-
         });
     }
 }
