@@ -14,3 +14,16 @@ Finally I also got stuck on the problem that User is not a valid table name by d
 ## Inspection of database
 I inspected my database by adding a h2 webserver when the test is running, and pausing the tests via 'thread.sleep()' when I'd like to inspect the table. Then in a web browser I can explore the table structure like in the following screenshots.
 
+![log in portal on localhost for h2 db](images/week_4/login_db.png)
+
+![select all polls](images/week_4/select_poll.png)
+
+![select all users](images/week_4/select_users.png)
+
+![select all users polls](images/week_4/select_users_poll.png)
+
+![select all user's votes](images/week_4/select_users_vote.png)
+
+![select all votes](images/week_4/select_vote.png)
+
+![select all vote options](images/week_4/select_voteoption.png)
